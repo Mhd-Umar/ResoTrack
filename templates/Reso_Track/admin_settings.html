@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Website Settings{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card card-custom p-4 shadow border-0 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-2">
+                    <h3 class="fw-bold mb-0"><i class="fas fa-cog text-secondary"></i> Global Site Configuration</h3>
+                    <div>
+                        <a href="{% url 'admin_sliders' %}" class="btn btn-primary btn-sm me-1"><i class="fas fa-images"></i> Manage Hero Sliders</a>
+                        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary btn-sm">Back to Dashboard</a>
+                    </div>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 border-end">
+                            <h5 class="fw-bold text-primary mb-3">Identity & Content</h5>
+                            {{ form.site_name|as_crispy_field }}
+                            {{ form.logo|as_crispy_field }}
+                            {% if site_settings.logo %}
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Current Logo:</small>
+                                    <img src="{{ site_settings.logo.url }}" alt="Logo" style="max-height: 50px;" class="mt-1 shadow-sm rounded">
+                                </div>
+                            {% endif %}
+                            {{ form.hero_title|as_crispy_field }}
+                            {{ form.hero_subtitle|as_crispy_field }}
+                        </div>
+                        
+                        <div class="col-md-6 px-4">
+                            <h5 class="fw-bold text-primary mb-3">Contact & Hero Assets</h5>
+                            {{ form.contact_email|as_crispy_field }}
+                            {{ form.contact_phone|as_crispy_field }}
+                            {{ form.hero_image|as_crispy_field }}
+                            {% if site_settings.hero_image %}
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Current Hero Image:</small>
+                                    <img src="{{ site_settings.hero_image.url }}" alt="Hero" style="max-height: 100px;" class="mt-1 shadow-sm rounded w-100 object-fit-cover">
+                                </div>
+                            {% endif %}
+                            {{ form.about_text|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold shadow">Save Site Configuration</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

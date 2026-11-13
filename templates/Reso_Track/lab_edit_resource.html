@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Edit Lab Resource{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card card-custom p-4 shadow-sm border-0 bg-white">
+                <div class="mb-4 d-flex align-items-center justify-content-between pb-3 border-bottom">
+                    <h3 class="fw-bold mb-0 text-info"><i class="fas fa-edit"></i> Edit Resource</h3>
+                    <a href="{% url 'lab_admin_dashboard' %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+                </div>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Lab</label>
+                        <input type="text" class="form-control bg-light" value="{{ resource.lab.lab_name }}" readonly>
+                    </div>
+                    
+                    {{ form|crispy }}
+                    
+                    <button type="submit" class="btn btn-info btn-lg fw-bold w-100 shadow-sm mt-4 text-white">Update Resource</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

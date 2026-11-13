@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card card-custom p-4 shadow-sm border-0 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-2">
+                    <h3 class="fw-bold mb-0"><i class="fas fa-image text-primary"></i> {{ title }}</h3>
+                    <a href="{% url 'admin_sliders' %}" class="btn btn-outline-secondary btn-sm">Cancel</a>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary fw-bold">Save Slide</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Resource Analyzer{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card card-custom p-4 shadow-sm border-0 mb-4 bg-white">
+        <h3 class="fw-bold mb-3"><i class="fas fa-server text-primary"></i> Resource Analyzer</h3>
+        
+        <!-- Filters -->
+        <form method="GET" class="row g-3 mb-4 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Department</label>
+                <select name="department" class="form-select">
+                    <option value="">All Departments</option>
+                    {% for key, value in departments %}
+                    <option value="{{ key }}" {% if request.GET.department == key %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Laboratory</label>
+                <select name="lab" class="form-select">
+                    <option value="">All Labs</option>
+                    {% for l in labs %}
+                    <option value="{{ l.id }}" {% if request.GET.lab == l.id|stringformat:"s" %}selected{% endif %}>{{ l.lab_name }} ({{ l.lab_code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Search</label>
+                <input type="text" name="search" class="form-control" placeholder="Resource Name..." value="{{ request.GET.search }}">
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter"></i> Filter</button>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>SI No</th>
+                        <th>Lab</th>
+                        <th>Resource Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for res in resources %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ res.lab.lab_name }}</td>
+                        <td class="fw-bold">{{ res.resource_name }}</td>
+                        <td class="text-truncate" style="max-width: 200px;">{{ res.description }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if res.status == 'WORKING' %}bg-success
+                                {% elif res.status == 'MAINTENANCE' %}bg-warning text-dark
+                                {% else %}bg-danger{% endif %}">
+                                {{ res.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-muted small">{{ res.last_updated|date:"d M, Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted p-4">No resources found matching the criteria.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

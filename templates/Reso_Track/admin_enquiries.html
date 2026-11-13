@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Enquiries | Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card card-custom p-4 shadow-sm border-0 bg-white">
+        <div class="mb-4 d-flex align-items-center justify-content-between pb-2 border-bottom">
+            <h3 class="fw-bold text-success mb-0"><i class="fas fa-headset"></i> Contact Enquiries</h3>
+            <div class="d-flex align-items-center gap-3">
+                <form method="GET" class="d-flex gap-2 align-items-center">
+                    <label class="small fw-bold text-muted text-nowrap">Filter Response:</label>
+                    <select name="status" class="form-select form-select-sm" style="width: 150px;" onchange="this.form.submit()">
+                        <option value="">-- All --</option>
+                        <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="responded" {% if request.GET.status == 'responded' %}selected{% endif %}>Responded</option>
+                    </select>
+                </form>
+                <span class="badge bg-success rounded-pill px-3">{{ enquiries.count }} Shown</span>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr class="table-light">
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in enquiries %}
+                    <tr>
+                        <td>{{ e.date_submitted|date:"d/m/Y h:i A" }}</td>
+                        <td class="fw-bold">{{ e.name }}</td>
+                        <td>{{ e.email }}</td>
+                        <td>{{ e.subject }}</td>
+                        <td>
+                            {% if e.is_responded %}
+                            <span class="badge bg-success">Responded</span>
+                            {% else %}
+                            <span class="badge bg-warning">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'admin_reply_enquiry' e.id %}" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i> View Details</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center p-5 text-muted">No enquiries received yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

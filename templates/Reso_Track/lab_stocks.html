@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Lab Administrator Stocks | RESOTRACK{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card card-custom p-4 shadow-sm border-0 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold text-success mb-0"><i class="fas fa-boxes"></i> Master Stock Directory</h3>
+            <div>
+                <a href="{% url 'lab_add_stock' %}" class="btn btn-success fw-bold shadow-sm me-2"><i class="fas fa-plus"></i> Add New Stock</a>
+                <button id="printBtn" class="btn btn-outline-dark shadow-sm"><i class="fas fa-print"></i> Print Report</button>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="row g-2 mb-4 p-3 bg-light rounded shadow-sm border">
+            <div class="col-md-10">
+                <form method="GET" class="row g-2 align-items-end" id="filterForm">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Filter By</label>
+                        <select name="filter_type" class="form-select form-select-sm" id="filterType">
+                            <option value="">-- All Stocks --</option>
+                            <option value="year" {% if request.GET.filter_type == 'year' %}selected{% endif %}>Year</option>
+                            <option value="month" {% if request.GET.filter_type == 'month' %}selected{% endif %}>Month (1-12)</option>
+                            <option value="day" {% if request.GET.filter_type == 'day' %}selected{% endif %}>Day of Month</option>
+                            <option value="date" {% if request.GET.filter_type == 'date' %}selected{% endif %}>Specific Date</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4" id="valContainer">
+                        <label class="form-label small fw-bold">Value</label>
+                        <input type="text" name="filter_val" class="form-control form-select-sm" placeholder="Search..." value="{{ request.GET.filter_val|default:'' }}" id="filterVal">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-sm btn-primary w-100 shadow-sm"><i class="fas fa-filter"></i> Apply</button>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="{% url 'lab_stocks' %}" class="btn btn-sm btn-outline-secondary w-100 shadow-sm">Reset</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle border">
+                <thead class="table-light">
+                    <tr>
+                        <th>SI No</th>
+                        <th>Name</th>
+                        <th>Quantity</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Bill No</th>
+                        <th>Price (₹)</th>
+                        <th>Remarks</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in stocks %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="fw-bold text-dark">{{ s.stock_name }}</td>
+                        <td>{{ s.quantity }}</td>
+                        <td>{{ s.date|date:"d/m/Y"|default:"-" }}</td>
+                        <td>{{ s.time|time:"h:i A"|default:"-" }}</td>
+                        <td class="text-muted">{{ s.bill_no|default:"N/A" }}</td>
+                        <td class="text-success fw-bold">₹ {{ s.price }}</td>
+                        <td style="max-width: 200px;" class="text-truncate">{{ s.remarks|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'lab_edit_stock' s.id %}" class="btn btn-sm btn-outline-success shadow-sm me-1"><i class="fas fa-edit"></i></a>
+                            <button class="btn btn-sm btn-danger shadow-sm" data-bs-toggle="modal" data-bs-target="#deleteStock{{ s.id }}"><i class="fas fa-trash-alt"></i></button>
+                            
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteStock{{ s.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title fw-bold text-danger">Confirm Deletion</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body text-start border-0 text-muted">
+                                            Are you sure you want to delete the stock record for <strong>{{ s.stock_name }}</strong>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <a href="{% url 'lab_delete_stock' s.id %}" class="btn btn-danger">Delete Stock</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted p-4">No stock details have been recorded yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('printBtn').addEventListener('click', function() {
+        const urlParams = window.location.search;
+        const printUrl = "{% url 'lab_stocks_print' %}" + urlParams;
+        window.open(printUrl, '_blank');
+    });
+
+    const filterType = document.getElementById('filterType');
+    const filterVal = document.getElementById('filterVal');
+
+    if(filterType && filterVal) {
+        filterType.addEventListener('change', function() {
+            const val = this.value;
+            if (val === 'date') {
+                filterVal.type = 'date';
+            } else if (val === 'year' || val === 'month' || val === 'day') {
+                filterVal.type = 'number';
+            } else {
+                filterVal.type = 'text';
+            }
+        });
+
+        window.addEventListener('load', function() {
+            if (filterType.value === 'date') filterVal.type = 'date';
+            else if (['year', 'month', 'day'].includes(filterType.value)) filterVal.type = 'number';
+        });
+    }
+</script>
+{% endblock %}

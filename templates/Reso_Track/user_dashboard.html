@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <h2 class="fw-bold"><i class="fas fa-home gradient-text"></i> Student Dashboard</h2>
+        <span class="badge bg-primary fs-6">{{ user.get_department_display }}</span>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-5">
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card card-custom h-100 border-0 bg-white shadow-sm p-4 text-center">
+                <i class="fas fa-exclamation-circle fs-1 text-danger mb-3"></i>
+                <h3 class="fw-bold">{{ complaint_count }}</h3>
+                <p class="text-muted mb-0">Total Complaints</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card card-custom h-100 border-0 bg-white shadow-sm p-4 text-center">
+                <i class="fas fa-lightbulb fs-1 text-warning mb-3"></i>
+                <h3 class="fw-bold">{{ suggestion_count }}</h3>
+                <p class="text-muted mb-0">Suggestions Made</p>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="col-md-12 col-lg-6 mb-4">
+            <div class="card card-custom h-100 border-0 bg-white shadow-sm p-4">
+                <h5 class="fw-bold mb-3"><i class="fas fa-bolt text-warning"></i> Quick Actions</h5>
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="{% url 'resources' %}" class="btn btn-outline-primary mb-2"><i class="fas fa-search"></i> Resource Analyzer</a>
+                    <a href="{% url 'add_complaint' %}" class="btn btn-outline-danger mb-2"><i class="fas fa-plus-circle"></i> File Complaint</a>
+                    <a href="{% url 'add_suggestion' %}" class="btn btn-outline-success mb-2"><i class="fas fa-comment-dots"></i> Submit Suggestion</a>
+                    <a href="{% url 'complaint_status' %}" class="btn btn-outline-info mb-2 text-dark"><i class="fas fa-list-ul"></i> Target Tracker</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Complaints -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-custom border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-history text-danger"></i> Recent Complaints</h5>
+                    <a href="{% url 'complaint_status' %}" class="btn btn-sm btn-light">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for c in complaints %}
+                        <li class="list-group-item p-3 border-light">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong>{{ c.lab.lab_name }}</strong>
+                                <div>
+                                    <span class="badge 
+                                        {% if c.status == 'PENDING' %}bg-warning text-dark
+                                        {% elif c.status == 'APPROVED' %}bg-info
+                                        {% elif c.status == 'IN_PROGRESS' %}bg-primary
+                                        {% elif c.status == 'RESOLVED' %}bg-success
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ c.get_status_display }}
+                                    </span>
+                                    <a href="{% url 'delete_complaint' c.id %}" class="text-danger ms-2" title="Delete" onclick="return confirm('Delete this complaint?')"><i class="fas fa-trash-alt"></i></a>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block text-truncate" style="max-width: 250px;">{{ c.complaint_text }}</small>
+                            <small class="text-muted"><i class="far fa-clock"></i> {{ c.date|date:"d M, Y H:i" }}</small>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-center text-muted p-4">No complaints recently filed.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Suggestions -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-custom border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-comments text-success"></i> Recent Suggestions</h5>
+                    <a href="#" class="btn btn-sm btn-light disabled">History</a>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for s in suggestions %}
+                        <li class="list-group-item p-3 border-light">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong>{{ s.get_category_display }}</strong>
+                                <div>
+                                    <span class="badge 
+                                        {% if s.status == 'PENDING' %}bg-warning text-dark
+                                        {% elif s.status == 'REVIEWED' %}bg-success
+                                        {% else %}bg-primary{% endif %}">
+                                        {{ s.get_status_display }}
+                                    </span>
+                                    <a href="{% url 'delete_suggestion' s.id %}" class="text-danger ms-2" title="Delete" onclick="return confirm('Delete this suggestion?')"><i class="fas fa-trash-alt"></i></a>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block text-truncate" style="max-width: 250px;">{{ s.suggestion_text }}</small>
+                            <small class="text-muted"><i class="far fa-calendar-alt"></i> {{ s.date_submitted|date:"d M, Y H:i" }}</small>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-center text-muted p-4">No suggestions recently made.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

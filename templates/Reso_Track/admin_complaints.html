@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Complaints{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card card-custom p-4 shadow-sm border-0 bg-white">
+        <div class="mb-4 d-flex align-items-center justify-content-between">
+            <h3 class="fw-bold mb-0"><i class="fas fa-exclamation-circle text-danger"></i> System Complaints</h3>
+            <form method="GET" class="d-flex gap-2 align-items-center">
+                <label class="small fw-bold text-muted text-nowrap">Filter Status:</label>
+                <select name="status" class="form-select form-select-sm" style="width: 180px;" onchange="this.form.submit()">
+                    <option value="">-- All Status --</option>
+                    {% for key, val in status_choices %}
+                    <option value="{{ key }}" {% if request.GET.status == key %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+                {% if request.GET.status %}
+                <a href="{% url 'admin_complaints' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover align-middle border">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Lab</th>
+                        <th>Complaint Details</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in complaints %}
+                    <tr>
+                        <td class="text-muted small">{{ c.date|date:"d M, Y h:i A" }}</td>
+                        <td class="fw-bold">
+                            {% if c.is_anonymous %}
+                                <span class="text-muted fst-italic">Anonymous</span>
+                            {% else %}
+                                {{ c.user.username }}
+                            {% endif %}
+                        </td>
+                        <td class="fw-bold text-primary">{{ c.lab.lab_name }}</td>
+                        <td style="max-width: 250px;">{{ c.complaint_text|truncatechars:80 }}</td>
+                        <td>
+                            <span class="badge {% if c.priority == 'HIGH' %}bg-danger{% elif c.priority == 'MEDIUM' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
+                                {{ c.get_priority_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {% if c.status == 'PENDING' %}bg-secondary{% elif c.status == 'APPROVED' %}bg-info{% elif c.status == 'REJECTED' %}bg-danger{% elif c.status == 'IN_PROGRESS' %}bg-primary{% elif c.status == 'RESOLVED' %}bg-success{% endif %}">
+                                {{ c.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if c.status == 'PENDING' %}
+                            <a href="{% url 'admin_approve_complaint' c.id %}" class="btn btn-sm btn-success shadow-sm" title="Approve"><i class="fas fa-check"></i></a>
+                            <a href="{% url 'admin_reject_complaint' c.id %}" class="btn btn-sm btn-danger shadow-sm ms-1" title="Reject"><i class="fas fa-times"></i></a>
+                            {% else %}
+                            <span class="text-muted small fst-italic">Decided</span>
+                            {% endif %}
+                            <a href="{% url 'admin_delete_complaint' c.id %}" class="btn btn-sm btn-outline-danger shadow-sm ms-1" title="Delete" onclick="return confirm('Delete this complaint?')"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted p-4">No complaints recorded in the system.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

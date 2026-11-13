@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ site_settings.site_name }} | Home{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="container-fluid p-0 mb-5">
+    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="2000">
+        <div class="carousel-inner shadow-sm" style="max-height: 500px;">
+            {% if slides %}
+                {% for slide in slides %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <img src="{{ slide.image.url }}" class="d-block w-100" alt="Slide" style="height: 500px; object-fit: cover; filter: brightness(0.6);">
+                    {% if slide.title or slide.subtitle %}
+                    <div class="carousel-caption {% if forloop.first %}text-start{% elif forloop.last %}text-end{% else %}text-center{% endif %} mb-5 d-none d-md-block">
+                        {% if slide.title %}
+                        <h1 class="display-3 fw-bold text-white">{{ slide.title }}</h1>
+                        {% endif %}
+                        {% if slide.subtitle %}
+                        <p class="fs-4 text-light">{{ slide.subtitle }}</p>
+                        {% endif %}
+                        {% if forloop.first %}
+                        <a href="{% url 'register' %}" class="btn gradient-btn btn-lg rounded-pill px-4 me-2 mt-3">Get Started</a>
+                        {% endif %}
+                    </div>
+                    {% elif forloop.first %}
+                    <div class="carousel-caption text-start mb-5 d-none d-md-block">
+                         <a href="{% url 'register' %}" class="btn gradient-btn btn-lg rounded-pill px-4 me-2 mt-3">Get Started</a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="carousel-item active">
+                    {% if site_settings.hero_image %}
+                        <img src="{{ site_settings.hero_image.url }}" class="d-block w-100" alt="Hero Image" style="height: 500px; object-fit: cover; filter: brightness(0.6);">
+                    {% else %}
+                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" class="d-block w-100" alt="Laboratories" style="height: 500px; object-fit: cover; filter: brightness(0.6);">
+                    {% endif %}
+                    {% if site_settings.hero_title or site_settings.hero_subtitle %}
+                    <div class="carousel-caption text-start mb-5 d-none d-md-block">
+                        {% if site_settings.hero_title %}
+                        <h1 class="display-3 fw-bold text-white">{{ site_settings.hero_title }}</h1>
+                        {% endif %}
+                        {% if site_settings.hero_subtitle %}
+                        <p class="fs-4 text-light">{{ site_settings.hero_subtitle }}</p>
+                        {% endif %}
+                        <a href="{% url 'register' %}" class="btn gradient-btn btn-lg rounded-pill px-4 me-2 mt-3">Get Started</a>
+                    </div>
+                    {% else %}
+                    <div class="carousel-caption text-start mb-5 d-none d-md-block">
+                        <a href="{% url 'register' %}" class="btn gradient-btn btn-lg rounded-pill px-4 me-2 mt-3">Get Started</a>
+                    </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon rounded-circle bg-dark p-3" aria-hidden="true"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon rounded-circle bg-dark p-3" aria-hidden="true"></span>
+        </button>
+    </div>
+</div>
+
+
+
+<div class="container my-5" id="about">
+    <div class="text-center mb-5">
+                <h2 class="fw-bold gradient-text display-5">About {{ site_settings.site_name }}</h2>
+                <p class="text-muted fs-5">A revolutionary tool streamlining laboratory inventory, stock, and complaint management.</p>
+            </div>
+        
+            <div class="row justify-content-center mb-5 text-center">
+                <div class="col-md-10">
+                    <div class="card card-custom p-5 border-0 shadow-sm bg-white border-start border-5 border-success">
+                        <h4 class="fw-bold text-success mb-3"><i class="fas fa-microscope"></i> About Our Tool</h4>
+                        <p class="text-muted fs-5 lead">
+                            {{ site_settings.about_text }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+    <!-- Stats Bar (Moved here) -->
+    <div class="container mb-5">
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-3">
+                <div class="card card-custom p-4 text-center bg-white border-0 shadow-sm border-bottom border-primary border-3">
+                    <h2 class="fw-bold text-primary">{{ stats.total_users }}</h2>
+                    <span class="text-muted text-uppercase fw-bold small">Total Users</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-custom p-4 text-center bg-white border-0 shadow-sm border-bottom border-warning border-3">
+                    <h2 class="fw-bold text-warning">{{ stats.total_complaints }}</h2>
+                    <span class="text-muted text-uppercase fw-bold small">Complaints</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-custom p-4 text-center bg-white border-0 shadow-sm border-bottom border-success border-3">
+                    <h2 class="fw-bold text-success">{{ stats.solved_complaints }}</h2>
+                    <span class="text-muted text-uppercase fw-bold small">Resolved</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-custom p-4 text-center bg-white border-0 shadow-sm border-bottom border-info border-3">
+                    <h2 class="fw-bold text-info">{{ stats.total_suggestions }}</h2>
+                    <span class="text-muted text-uppercase fw-bold small">Suggestions</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works & Benefits -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card card-custom h-100 p-4 shadow-sm bg-white border-0">
+                <h4 class="fw-bold text-success mb-4"><i class="fas fa-project-diagram"></i> How It Works</h4>
+                <div class="d-flex mb-3">
+                    <div class="me-3 fs-3 text-success"><i class="fas fa-id-card"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Easy Registration</h6>
+                        <p class="small text-muted">Students can sign up with their department details in seconds.</p>
+                    </div>
+                </div>
+                <div class="d-flex mb-3">
+                    <div class="me-3 fs-3 text-success"><i class="fas fa-bug"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Incident Reporting</h6>
+                        <p class="small text-muted">Log complaints or suggestions for any lab equipment or infrastructure.</p>
+                    </div>
+                </div>
+                <div class="d-flex mb-3">
+                    <div class="me-3 fs-3 text-success"><i class="fas fa-user-shield"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Admin Resolution</h6>
+                        <p class="small text-muted">Main Admins review and forward reports to Lab Admins for resolution.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card card-custom h-100 p-4 shadow-sm bg-white border-0">
+                <h4 class="fw-bold text-success mb-4"><i class="fas fa-check-double"></i> System Benefits</h4>
+                <ul class="list-unstyled">
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-check-circle text-success me-3"></i>
+                        <span>Centralized Resource Tracking</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-check-circle text-success me-3"></i>
+                        <span>Zero Paperwork Maintenance</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-check-circle text-success me-3"></i>
+                        <span>Real-time Status Dashboards</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-check-circle text-success me-3"></i>
+                        <span>Instant Feedback Loop</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-check-circle text-success me-3"></i>
+                        <span>Automated Master Stock Reports</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <!-- Mission -->
+        <div class="col-md-5">
+            <div class="card card-custom h-100 p-5 text-center shadow-sm">
+                <div class="mx-auto icon-circle">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <h3 class="fw-bold mt-2">Our Mission</h3>
+                <p class="text-muted mt-3">
+                    Our mission is to digitize laboratory management and create transparency between students and administration. 
+                    We strive to make reporting simple and rapid while providing analytical insights to the organization.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Vision -->
+        <div class="col-md-5">
+            <div class="card card-custom h-100 p-5 text-center shadow-sm">
+                <div class="mx-auto icon-circle">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <h3 class="fw-bold mt-2">Our Vision</h3>
+                <p class="text-muted mt-3">
+                    Our vision is to build a smart automated academic infrastructure monitoring platform. 
+                    Integrating software reliability with academic hardware necessities for ultimate performance tracking.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5" id="contact">
+    <div class="row align-items-center bg-white rounded-4 shadow-sm p-5 border border-light">
+        <div class="col-lg-6">
+            <h2 class="fw-bold mb-4">Got Questions? <br> <span class="gradient-text">Reach Out!</span></h2>
+            <p class="text-muted mb-4">We are available to solve your queries and guide you through the platform capabilities.</p>
+            <ul class="list-unstyled">
+                <li class="mb-3"><i class="fas fa-map-marker-alt text-primary me-3 fs-5"></i> GOVERNMENT POLYTECHNIC COLLEGE ATTINGAL</li>
+                <li class="mb-3"><i class="fas fa-envelope text-primary me-3 fs-5"></i> {{ site_settings.contact_email }}</li>
+                <li class="mb-3"><i class="fas fa-phone text-primary me-3 fs-5"></i> {{ site_settings.contact_phone }}</li>
+            </ul>
+        </div>
+        <div class="col-lg-6 mt-4 mt-lg-0">
+            <div class="card card-custom p-4 shadow-sm border-0 bg-light">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3"><input type="text" name="name" class="form-control bg-white" placeholder="Full Name" required></div>
+                    <div class="mb-3"><input type="email" name="email" class="form-control bg-white" placeholder="Email Address" required></div>
+                    <div class="mb-3"><input type="text" name="subject" class="form-control bg-white" placeholder="Subject" required></div>
+                    <div class="mb-3"><textarea name="message" class="form-control bg-white" rows="4" placeholder="Your Message" required></textarea></div>
+                    <button type="submit" class="btn gradient-btn w-100 fw-bold">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

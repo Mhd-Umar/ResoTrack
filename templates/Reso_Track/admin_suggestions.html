@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Suggestions{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card card-custom p-4 shadow-sm border-0 bg-white">
+        <div class="mb-4 d-flex align-items-center justify-content-between">
+            <h3 class="fw-bold mb-0"><i class="fas fa-lightbulb text-warning"></i> System Suggestions</h3>
+            <form method="GET" class="d-flex gap-2 align-items-center">
+                <label class="small fw-bold text-muted text-nowrap">Filter Status:</label>
+                <select name="status" class="form-select form-select-sm" style="width: 180px;" onchange="this.form.submit()">
+                    <option value="">-- All Status --</option>
+                    {% for key, val in status_choices %}
+                    <option value="{{ key }}" {% if request.GET.status == key %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+                {% if request.GET.status %}
+                <a href="{% url 'admin_suggestions' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover align-middle border">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Category</th>
+                        <th>Suggestion Details</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in suggestions %}
+                    <tr>
+                        <td class="text-muted small">{{ s.date_submitted|date:"d M, Y h:i A" }}</td>
+                        <td class="fw-bold">
+                            {% if s.is_anonymous %}
+                                <span class="text-muted fst-italic">Anonymous</span>
+                            {% else %}
+                                {{ s.user.username }}
+                            {% endif %}
+                        </td>
+                        <td class="fw-bold text-info">{{ s.get_category_display }}</td>
+                        <td style="max-width: 350px;">{{ s.suggestion_text }}</td>
+                        <td>
+                            <span class="badge {% if s.status == 'PENDING' %}bg-warning text-dark{% elif s.status == 'REVIEWED' %}bg-success{% else %}bg-primary{% endif %}">
+                                {{ s.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <form method="POST" class="d-flex align-items-center">
+                                {% csrf_token %}
+                                <input type="hidden" name="s_id" value="{{ s.id }}">
+                                <select name="status" class="form-select form-select-sm shadow-sm me-2" style="width: 140px;">
+                                    <option value="PENDING" {% if s.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                                    <option value="REVIEWED" {% if s.status == 'REVIEWED' %}selected{% endif %}>Reviewed</option>
+                                    <option value="FORWARDED" {% if s.status == 'FORWARDED' %}selected{% endif %}>Forwarded</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary shadow-sm">Update</button>
+                                <a href="{% url 'admin_delete_suggestion' s.id %}" class="btn btn-sm btn-outline-danger shadow-sm ms-2" title="Delete" onclick="return confirm('Delete this suggestion?')"><i class="fas fa-trash"></i></a>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted p-4">No suggestions received yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

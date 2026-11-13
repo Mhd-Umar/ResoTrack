@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Lab Administrator Complaints{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card card-custom p-4 shadow-sm border-0 bg-white">
+        <h3 class="fw-bold mb-4 border-bottom pb-2 text-primary"><i class="fas fa-hammer"></i> Complaints Feed</h3>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle border">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Complaint Details</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in complaints %}
+                    <tr>
+                        <td class="text-muted small">{{ c.date|date:"d M, Y h:i A" }}</td>
+                        <td class="fw-bold">
+                            {% if c.is_anonymous %}
+                                <span class="text-muted fst-italic">Anonymous</span>
+                            {% else %}
+                                {{ c.user.username }}
+                            {% endif %}
+                            <br><small class="text-muted">{{ c.lab.lab_name }}</small>
+                        </td>
+                        <td style="max-width: 300px;">{{ c.complaint_text|truncatechars:80 }}</td>
+                        <td>
+                            <span
+                                class="badge {% if c.priority == 'HIGH' %}bg-danger{% elif c.priority == 'MEDIUM' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
+                                {{ c.get_priority_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span
+                                class="badge {% if c.status == 'PENDING' %}bg-secondary{% elif c.status == 'APPROVED' %}bg-info{% elif c.status == 'REJECTED' %}bg-danger{% elif c.status == 'IN_PROGRESS' %}bg-primary{% elif c.status == 'RESOLVED' %}bg-success{% endif %}">
+                                {{ c.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if c.status in "APPROVED,IN_PROGRESS" %}
+                            {% if c.status != 'IN_PROGRESS' %}
+                            <a href="{% url 'lab_update_complaint' c.id 'IN_PROGRESS' %}"
+                                class="btn btn-sm btn-primary shadow-sm" title="Mark as In Progress"><i
+                                    class="fas fa-tools"></i> Start Fix</a>
+                            {% endif %}
+                            <a href="{% url 'lab_update_complaint' c.id 'RESOLVED' %}"
+                                class="btn btn-sm btn-success shadow-sm" title="Mark as Resolved"><i
+                                    class="fas fa-check-circle"></i> Resolve</a>
+                            {% else %}
+                            <span class="text-muted small fst-italic">No action</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted p-4">No complaints assigned to your labs at this
+                            time.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
