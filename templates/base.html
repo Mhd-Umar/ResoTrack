@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ site_settings.site_name }}{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #00b09b;
+            --secondary-color: #96c93d;
+            --deep-green: #0a503a;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fff9;
+            color: #212529;
+        }
+        .navbar-custom {
+            background: linear-gradient(135deg, var(--deep-green) 0%, var(--primary-color) 100%);
+            padding: 0.8rem 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .logo-nav {
+            height: 44px;
+            width: 44px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            padding: 4px;
+            margin-right: 12px;
+            object-fit: contain;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border: 2px solid #ffffff; /* Ensures the circular edge is smooth and white */
+        }
+        .navbar-custom .navbar-brand, .navbar-custom .nav-link {
+            color: white !important;
+        }
+        .navbar-custom .nav-link:hover {
+            color: #d1d1d1 !important;
+        }
+        .footer-custom {
+            background-color: #212529;
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        .gradient-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+        }
+        .gradient-btn:hover {
+            opacity: 0.9;
+            color: white;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .card-custom:hover {
+            transform: translateY(-5px);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .icon-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(106, 17, 203, 0.1), rgba(37, 117, 252, 0.1));
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center">
+                <a class="navbar-brand fw-bold d-flex align-items-center me-3" href="{% if user.is_authenticated %}{% if user.is_main_admin %}{% url 'admin_dashboard' %}{% elif user.is_lab_admin %}{% url 'lab_admin_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}{% else %}{% url 'landing' %}{% endif %}">
+                    {% if site_settings.logo %}
+                        <img src="{{ site_settings.logo.url }}" alt="Logo" class="logo-nav">
+                    {% else %}
+                        <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo-nav">
+                    {% endif %}
+                    <span class="ls-1 text-uppercase">{{ site_settings.site_name }}</span>
+                </a>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm"><i class="fas fa-lock me-1"></i> Admin</a>
+                {% endif %}
+            </div>
+
+            <button class="navbar-toggler text-white border-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    {% if not user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'landing' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact Us</a>
+                    </li>
+                    {% else %}
+                        {% if user.is_student %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'resources' %}">Resource Analyzer</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'complaint_status' %}">Complaints</a></li>
+                        {% elif user.is_main_admin %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'admin_users' %}">Users</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'admin_labs' %}">Labs</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'admin_complaints' %}">
+                                Complaints
+                                {% if notif_counts.admin_complaints %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.65rem;">
+                                    {{ notif_counts.admin_complaints }}
+                                </span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'admin_suggestions' %}">
+                                Suggestions
+                                {% if notif_counts.admin_suggestions %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.65rem;">
+                                    {{ notif_counts.admin_suggestions }}
+                                </span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'admin_enquiries' %}">
+                                Enquiries
+                                {% if notif_counts.admin_enquiries %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.65rem;">
+                                    {{ notif_counts.admin_enquiries }}
+                                </span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'admin_reports' %}">Analytics</a></li>
+                        {% elif user.is_lab_admin %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'lab_admin_dashboard' %}">Dashboard</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'lab_complaints' %}">
+                                Complaints
+                                {% if notif_counts.lab_complaints %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.65rem;">
+                                    {{ notif_counts.lab_complaints }}
+                                </span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'lab_suggestions' %}">
+                                Suggestions
+                                {% if notif_counts.lab_suggestions %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.65rem;">
+                                    {{ notif_counts.lab_suggestions }}
+                                </span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'lab_stocks' %}">Stock</a></li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle fs-4 me-2"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item me-2">
+                        <a class="btn btn-outline-light" href="{% url 'login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-success" href="{% url 'register' %}">Register</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="min-vh-100">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-custom text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5 class="fw-bold d-flex align-items-center text-uppercase">
+                        {% if site_settings.logo %}
+                            <img src="{{ site_settings.logo.url }}" alt="Logo" style="height: 36px; width: 36px; background-color: white; border-radius: 50%; padding: 4px; border: 1px solid #ddd; margin-right: 12px;">
+                        {% else %}
+                            <img src="{% static 'img/logo.png' %}" alt="Logo" style="height: 36px; width: 36px; background-color: white; border-radius: 50%; padding: 4px; border: 1px solid #ddd; margin-right: 12px;">
+                        {% endif %}
+                        {{ site_settings.site_name }}
+                    </h5>
+                    <p class="text-muted small">{{ site_settings.about_text|truncatechars:120 }}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white text-decoration-none">Developed By</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">TEAM RESOTRACK,COMPUTER HARDWARE ENGINEERING</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">@2026</a></li>
+                         <li><a href="#" class="text-white text-decoration-none">MADE IN INDIA♥️</a></li>
+                    </ul>
+                </div>
+                <!--
+                <div class="col-md-4 mb-3">
+                    <h5 class="fw-bold">Follow Us</h5>
+                    <a href="#" class="text-white me-3 fs-4"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="text-white me-3 fs-4"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-white fs-4"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+                -->
+            <hr class="border-secondary">
+            <p class="mb-0 text-muted">Developed by RESOTRACK Team &copy; 2026. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
